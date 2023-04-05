@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import { env } from "./configs/environments.";
 import cors from "cors";
 import questionRoute from "./routes/question.route";
+import { Server } from "socket.io";
+import http, { Server as ServerHTTP } from "http";
 
 import Socket from "./socket";
 
@@ -33,9 +35,11 @@ const bootApp = () => {
     res.send("Wellcom to Music Arena Server");
   });
 
-  Socket();
+  const server: ServerHTTP = http.createServer(app);
 
-  app.listen(port, () => {
+  Socket(server);
+
+  server.listen(port, () => {
     console.log(`⚡️[server]: Server is running at ${host}:${port}`);
   });
 };

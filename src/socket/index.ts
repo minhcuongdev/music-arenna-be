@@ -1,4 +1,6 @@
 import { Server } from "socket.io";
+import { env } from "../configs/environments.";
+import { Server as ServerHTTP } from "http";
 
 let users: {
   userId: string;
@@ -18,8 +20,8 @@ const getUser = (userId: string) => {
   return users.find((user) => user.userId === userId);
 };
 
-const Socket = () => {
-  const io = new Server(8900, {
+const Socket = (server: ServerHTTP) => {
+  const io = new Server(server, {
     cors: {},
   });
 
