@@ -1,23 +1,15 @@
 import { Server } from "socket.io";
-import { env } from "../configs/environments.";
 import { Server as ServerHTTP } from "http";
+import Room from "../interfaces/room";
+import { v4 as uuidv4 } from "uuid";
+import Player from "../interfaces/player";
 
-let users: {
-  userId: string;
-  socketId: string;
-}[] = [];
+let rooms: Array<Room> = [];
 
-const addUser = (userId: string, socketId: string) => {
-  !users.some((user) => user.userId === userId) &&
-    users.push({ userId, socketId });
-};
-
-const removeUser = (socketId: string) => {
-  users = users.filter((user) => user.socketId !== socketId);
-};
-
-const getUser = (userId: string) => {
-  return users.find((user) => user.userId === userId);
+const getRoomById = (id: string) => {
+  const getedRooms = rooms.filter((room) => room.id === id);
+  if (getedRooms.length === 0) return null;
+  return getedRooms[0];
 };
 
 const Socket = (server: ServerHTTP) => {
@@ -26,17 +18,69 @@ const Socket = (server: ServerHTTP) => {
   });
 
   io.on("connection", (socket) => {
-    console.log("a user connected");
+    console.log("a user connected ", socket.id);
 
-    socket.on("addUser", (userId) => {
-      addUser(userId, socket.id);
-      io.emit("getUsers", users);
+    socket.emit("getRooms", rooms);
+
+    socket.on("createRoom", (name, host) => {
+      const room: Room = {
+        id: uuidv4(),
+        name: name,
+        host: host,
+        players: [],
+      };
+
+      rooms.push(room);
+
+      socket.emit("getCreatedRoom", room);
+    });
+
+    socket.on("joinRoom", (roomId, name) => {
+      const room = getRoomById(roomId);
+
+      if (room === null) return;
+
+      socket.join(room.id);
+
+      const player: Player = {
+        id: socket.id,
+        name: name ? name : room.host,
+        score: 0,
+      };
+
+      room.players.push(player);
+
+      io.to(room.id).emit("getPlayersInRoom", room.players);
+
+      io.emit("getRooms", rooms);
+    });
+
+    socket.on("removeRoom", (roomId) => {
+      const room = getRoomById(roomId);
+      if (room === null) return;
+
+      socket.leave(room.id);
+      socket.leave(socket.id);
+
+      room.players = room.players.filter((player) => player.id !== socket.id);
+      if (room.players.length === 0) {
+        rooms = rooms.filter((room) => room.id !== roomId);
+      } else if (!room.players.some((player) => player.name === room.host)) {
+        room.host = room.players[0].name;
+      }
+
+      io.in(room.id).emit("getPlayersInRoom", room.players);
+
+      io.emit("getRooms", rooms);
+    });
+
+    socket.on("getExistRooms", () => {
+      io.emit("getRooms", rooms);
     });
 
     socket.on("disconnect", () => {
+      console.log(socket.id);
       console.log("a user disconnect!");
-      removeUser(socket.id);
-      io.emit("getUsers", users);
     });
   });
 };
