@@ -2,9 +2,10 @@ import express, { Express, Request, Response } from "express";
 import mongoose from "mongoose";
 import { env } from "./configs/environments.";
 import cors from "cors";
-import questionRoute from "./routes/question.route";
-import { Server } from "socket.io";
 import http, { Server as ServerHTTP } from "http";
+
+import questionRoute from "./routes/question.route";
+import playlistRoute from "./routes/playlist.route";
 
 import Socket from "./socket";
 
@@ -30,6 +31,7 @@ const bootApp = () => {
   app.use(cors());
 
   app.use("/api/questions", questionRoute);
+  app.use("/api/playlist", playlistRoute);
 
   app.get("/", (req: Request, res: Response) => {
     res.send("Wellcom to Music Arena Server");

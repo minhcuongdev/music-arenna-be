@@ -3,6 +3,7 @@ import { env } from "../configs/environments.";
 import Question from "../interfaces/questions";
 import Song from "../interfaces/song";
 import { randomIntFromInterval, randomNumbers } from "../utils/randoms";
+import PlayListService from "./playlist.service";
 
 const QuestionService = {
   getQuestions: async () => {
@@ -10,7 +11,9 @@ const QuestionService = {
     const client_secret = env.CLIENT_SECRET;
     const grant_type = env.GRANT_TYPE;
 
-    const playlist_id = "7iqgwLewy5Iz1ZIQB1Leiy";
+    const playlists = await PlayListService.getPlayLists();
+    const playlist_id =
+      playlists[randomIntFromInterval(0, playlists.length - 1)].id;
 
     const auth = await axios.post(
       env.TOKEN_URL,
