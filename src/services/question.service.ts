@@ -6,12 +6,12 @@ import { randomIntFromInterval, randomNumbers } from "../utils/randoms";
 import PlayListService from "./playlist.service";
 
 const QuestionService = {
-  getQuestions: async () => {
+  getQuestions: async (type?: string) => {
     const client_id = env.CLIENT_ID;
     const client_secret = env.CLIENT_SECRET;
     const grant_type = env.GRANT_TYPE;
 
-    const playlists = await PlayListService.getPlayLists();
+    const playlists = await PlayListService.getPlayLists(type);
     const playlist_id =
       playlists[randomIntFromInterval(0, playlists.length - 1)].id;
 

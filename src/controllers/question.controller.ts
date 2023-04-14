@@ -1,14 +1,17 @@
 import { HttpStatusCode } from "../utils/constants";
-import { Request, Response } from 'express';
+import { Request, Response } from "express";
 import QuestionService from "../services/question.service";
 
-export const getQuestions = async (req: Request, res: Response) => {
+export const getQuestions = async (
+  req: Request<{}, {}, {}, { type?: string }>,
+  res: Response
+) => {
   try {
-    const questions = await QuestionService.getQuestions()
-    res.status(HttpStatusCode.OK).json(questions)
+    const questions = await QuestionService.getQuestions(req.query.type);
+    res.status(HttpStatusCode.OK).json(questions);
   } catch (error: any) {
     res.status(HttpStatusCode.INTERNAL_SERVER).json({
-      errors: error.message
-    })
+      errors: error.message,
+    });
   }
-}
+};

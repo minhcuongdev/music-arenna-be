@@ -3,7 +3,7 @@ import { HttpStatusCode } from "../utils/constants";
 import PlayListService from "../services/playlist.service";
 
 export const addPlayList = async (
-  req: Request<{}, {}, { id: string }>,
+  req: Request<{}, {}, { id: string; type?: string }>,
   res: Response
 ) => {
   try {
@@ -14,9 +14,12 @@ export const addPlayList = async (
   }
 };
 
-export const getPlayLists = async (req: Request, res: Response) => {
+export const getPlayLists = async (
+  req: Request<{}, {}, {}, { type: string }>,
+  res: Response
+) => {
   try {
-    const playlists = await PlayListService.getPlayLists();
+    const playlists = await PlayListService.getPlayLists(req.query.type);
     return res.status(HttpStatusCode.OK).json(playlists);
   } catch (error) {
     res.status(HttpStatusCode.INTERNAL_SERVER).json(error);

@@ -6,6 +6,12 @@ const PlayListSchema = new Schema({
   id: {
     type: String,
     required: true,
+    unique: true,
+  },
+  type: {
+    type: String,
+    required: true,
+    default: "popular",
   },
 });
 
